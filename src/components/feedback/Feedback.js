@@ -19,6 +19,7 @@ const styles = (theme) => ({
     padding: "16px",
   },
 });
+
 class Feedback extends React.Component {
   constructor() {
     super();

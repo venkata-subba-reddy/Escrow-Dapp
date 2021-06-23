@@ -75,12 +75,18 @@ const userTypes = [
   },
 ];
 
-export default function Login() {
+export default function Login(props) {
   const classes = useStyles();
   const [type, setType] = React.useState("");
 
   const handleChange = (event) => {
     setType(event.target.value);
+  };
+
+  const handleSubmit = async event => {
+    event.preventDefault();
+    localStorage.setItem('escrow-login-type', type);
+    props.history.push('/project-list');
   };
 
   return (
@@ -95,7 +101,7 @@ export default function Login() {
           <Typography component="h1" variant="h5">
             Sign in
           </Typography>
-          <form className={classes.form} noValidate>
+          <form className={classes.form} onSubmit={handleSubmit}>
             <TextField
               variant="outlined"
               margin="normal"
@@ -125,6 +131,7 @@ export default function Login() {
               onChange={handleChange}
               variant="filled"
               style={{ width: "100%" }}
+              required
             >
               {userTypes.map((option) => (
                 <MenuItem key={option.value} value={option.value}>
@@ -136,17 +143,15 @@ export default function Login() {
               control={<Checkbox value="remember" color="primary" />}
               label="Remember me"
             />
-            <Link href="/project-list" variant="body2">
-              <Button
-                // type="submit"
-                fullWidth
-                variant="contained"
-                color="primary"
-                className={classes.submit}
-              >
-                Sign In
-              </Button>
-            </Link>
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              color="primary"
+              className={classes.submit}
+            >
+              Sign In
+            </Button>
             <Grid container>
               <Grid item xs>
                 <Link href="#" variant="body2">

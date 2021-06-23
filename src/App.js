@@ -2,7 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Route } from "react-router-dom";
 import  Feedback  from "./components/feedback/Feedback";
 import Login from "./components/login/Login";
-import ProjectList from "./components/prjtList/ProjectList";
+import ProjectList from "./components/ProjectList/ProjectList";
 
 function App() {
   return (
