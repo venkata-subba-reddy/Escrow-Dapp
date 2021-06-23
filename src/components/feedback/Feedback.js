@@ -1,4 +1,4 @@
-import { withStyles, Typography } from "@material-ui/core";
+import { withStyles, Typography, TextareaAutosize } from "@material-ui/core";
 import React from "react";
 import StarRatingComponent from "react-star-rating-component";
 
@@ -13,7 +13,7 @@ const styles = (theme) => ({
     fontSize: "40px",
     marginTop: "10%",
   },
-   textarea: {
+  textarea: {
     width: "60%",
     margin: "5% 20% 5% 20%",
     padding: "16px",
@@ -42,7 +42,7 @@ class Feedback extends React.Component {
         <Typography className={classes.title}>
           Customer Reviews means alot to us
         </Typography>
-            <TextareaAutosize
+        <TextareaAutosize
           aria-label="minimum height"
           rowsMin={6}
           placeholder="Write your review.."
