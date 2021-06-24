@@ -66,6 +66,7 @@ export default function ProjectList(props) {
   const classes = useStyles();
 
   const [contract, setContract] = useState(null);
+  const [contractBalance, setContractBalance] = useState(null);
   const [account, setAccount] = useState(null);
   const [projects, setProjects] = useState([]);
   const [isGovt, setIsGovt] = useState(true);
@@ -79,9 +80,13 @@ export default function ProjectList(props) {
     if (account && contract) {
       console.log('account:', account);
       console.log('contract:', contract);
+      console.log('contract address:', contract._address);
       setProjects([]);
       (async () => {
         try {
+          const contractBalance = await contract.methods.contractBalance().call();
+          console.log('contractBalance:', contractBalance);
+          setContractBalance(Web3.utils.fromWei(contractBalance, 'ether'));
           const totalProjects = await contract.methods.totalProjects().call();
           console.log('totalProjects:', totalProjects);
           // load Projects
@@ -170,12 +175,16 @@ export default function ProjectList(props) {
 
   const handleRating = (index) => {
     localStorage.setItem('escrow-rating-index', index);
-    props.history.push('/feedback');
+    props.history.push(`/feedback/${index}`);
   };
 
   const handleStart = async (index) => {
-    contract.methods.startProject(index)
-      .send({ from: account })
+    let eth = 0;
+    if (moment.unix(projects[index].project_start_timestamp).diff(moment()) < 0)
+      eth = 1;
+    let wei = Web3.utils.toWei(eth.toString(), 'ether');
+    contract.methods.startProject(index, wei)
+      .send({ from: account, value: wei })
       .on('error', (error, receipt) => {
         console.log(error, 'error');
         console.log(receipt, 'receipt');
@@ -211,9 +220,14 @@ export default function ProjectList(props) {
             <Typography className={classes.prjtname}>{project.name}</Typography>
             <Typography>Start time: {moment.unix(project.project_start_timestamp).format('lll')}</Typography>
             <Typography>End time: {moment.unix(project.project_end_timestamp).format('lll')}</Typography>
+            <Typography>Project Owner: {project.project_owner}</Typography>
             {isCustomer
               ?
-              <Button className={classes.btn} onClick={() => handleRating(index)}>Give Rating</Button>
+              project.project_started
+                ?
+                <Button className={classes.btn} onClick={() => handleRating(index)}>Give Rating</Button>
+                :
+                <Button className={classes.btn}>Project not started</Button>
               :
               project.project_started
                 ?
@@ -228,6 +242,7 @@ export default function ProjectList(props) {
       {isGovt && (
         <form className={classes.form} onSubmit={handleSubmit}>
           <h1 className={classes.title}>Create Projects</h1>
+          <h4 className={classes.title}>Contract balance: {contractBalance} ETH</h4>
           <TextField
             variant="outlined"
             margin="normal"
@@ -252,7 +267,7 @@ export default function ProjectList(props) {
               InputLabelProps={{
                 shrink: true,
               }}
-              value={formState.start || '2021-05-24T10:30'}
+              value={formState.start || moment().format('YYYY-MM-DDTHH:mm')}
               onChange={(e) => handleDateChange(e, 'start')}
             />
             <TextField
@@ -262,7 +277,7 @@ export default function ProjectList(props) {
               InputLabelProps={{
                 shrink: true,
               }}
-              value={formState.end || '2021-05-24T10:30'}
+              value={formState.end || moment().format('YYYY-MM-DDTHH:mm')}
               onChange={(e) => handleDateChange(e, 'end')}
             />
           </Grid>
@@ -274,7 +289,7 @@ export default function ProjectList(props) {
             color="primary"
             className={classes.submit}
           >
-            Sign In
+            Submit
           </Button>
         </form>
       )}

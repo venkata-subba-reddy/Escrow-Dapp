@@ -10,7 +10,7 @@ function App() {
       <div>
         <Route path="/" exact component={Login} />
         <Route path="/project-list" exact component={ProjectList} />
-        <Route path="/feedback" exact component={Feedback} />
+        <Route path="/feedback/:index" exact component={Feedback} />
       </div>
     </Router>
   );

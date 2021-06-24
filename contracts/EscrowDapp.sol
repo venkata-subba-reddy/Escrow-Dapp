@@ -1,33 +1,35 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.4.22 <0.9.0;
 
+import "./SafeMath_library.sol";
+
 contract EscrowDapp {
+    using SafeMath for uint256;
+
+    struct Customer {
+        string review;
+        uint256 rating;
+    }
     struct Project {
         bool project_started;
+        bool project_blocked;
         bool exist;
         string name;
         address payable project_owner;
         uint256 project_start_timestamp;
         uint256 project_end_timestamp;
+        mapping(address => Customer) customers;
     }
 
-    struct Customer {
-        uint256 rating;
-    }
-
-    bool is_wallet_blocked = false;
     address payable contract_owner;
-    address payable escrow_address;
     uint256 public totalProjects = 0;
-    uint256 one = 1;
+    uint256 private extras = 100;
 
-    mapping(address => Customer) public customers;
     mapping(uint256 => Project) public projects;
 
     event LowRating(address _project_owner);
 
-    constructor(address payable _escrow_address) public {
-        escrow_address = _escrow_address;
+    constructor() public {
         contract_owner = msg.sender;
     }
 
@@ -43,53 +45,105 @@ contract EscrowDapp {
         projects[totalProjects].name = _name;
         projects[totalProjects].project_started = false;
         projects[totalProjects].exist = true;
-        // projects[totalProjects].project_owner = msg.sender;
         projects[totalProjects]
-            .project_start_timestamp = _project_start_timestamp;
+        .project_start_timestamp = _project_start_timestamp;
         projects[totalProjects].project_end_timestamp = _project_end_timestamp;
         totalProjects++;
     }
 
-    function startProject(uint256 project_id) public payable {
-        require(projects[project_id].exist == true, "Unknown Project ID");
-        require(projects[project_id].project_started == false, "Project already started");
-        if (projects[project_id].project_start_timestamp > block.timestamp) {
-            // deduct 1 per cent amount from the wallet
-            escrow_address.transfer(address(msg.sender).balance * (one / 100));
-        }
-        projects[project_id].project_owner = msg.sender;
-        projects[project_id].project_started = true;
-        // release 10% if project starts
-        msg.sender.transfer(address(escrow_address).balance * ((one * 10) / 100));
+    // Fallback function to deposit the ethers to the contract
+    fallback() external payable {}
+
+    function contractBalance() public returns (uint256) {
+        return address(this).balance;
     }
 
-    // function rateProject(uint256 _rating) public payable {
-    //     require(_rating < 0 || _rating > 10, "Invalid rating");
-    //     // unblock if blocked
-    //     if (is_wallet_blocked) is_wallet_blocked = false;
-    //     // add to customers
-    //     customers[address(this)].rating = _rating;
-    //     if (_rating == 7) {
-    //         // warning issued to a private entity
-    //         emit LowRating(project_owner);
-    //     } else if (_rating == 6) {
-    //         // 3 per cent deduction from the wallet
-    //         project_owner.transfer(
-    //             address(escrow_address).balance * ((one * 3) / 100)
-    //         );
-    //     } else if (_rating >= 5) {
-    //         // wallet blocked
-    //         is_wallet_blocked = true;
-    //     }
-    // }
+    // Calculates onePercent of the uint256 amount sent
+    function onePercent(uint256 amount) internal view returns (uint256) {
+        uint256 roundValue = amount.ceil(extras);
+        uint256 onePercentofTokens = roundValue.mul(extras).div(
+            extras * 10**uint256(2)
+        );
+        return onePercentofTokens;
+    }
 
-    // function completedProject(address payable _owner) public payable {
-    //     require(
-    //         _owner == project_owner,
-    //         "Only owner is allowed to complete the project"
-    //     );
-    //     if (project_end_timestamp < block.timestamp) {
-    //         // charge a fee for using the project from customer.
-    //     }
-    // }
+    function startProject(uint256 _project_id, uint256 _weiAmount)
+        public
+        payable
+    {
+        require(projects[_project_id].exist == true, "Unknown Project ID");
+        require(
+            projects[_project_id].project_started == false,
+            "Project already started"
+        );
+        if (projects[_project_id].project_start_timestamp < block.timestamp) {
+            // deduct 1 per cent amount from the wallet
+            if (_weiAmount < (onePercent(address(this).balance) * 1)) {
+                revert(
+                    "Project time crossed. Add 1 percent of contract address"
+                );
+            }
+            address(this).transfer(_weiAmount);
+        }
+        projects[_project_id].project_owner = msg.sender;
+        projects[_project_id].project_started = true;
+        // release 10% if project starts
+        msg.sender.transfer(onePercent(address(this).balance) * 10);
+    }
+
+    function rateProject(uint256 _project_id, uint256 _rating, string memory _review) public payable {
+        require(_rating > 0 && _rating < 10, "Invalid rating");
+        require(
+            projects[_project_id].project_started == true,
+            "Project Not started"
+        );
+        require(
+            projects[_project_id].project_owner != msg.sender,
+            "Project owner cannot rate."
+        );
+        // unblock if blocked
+        if (projects[_project_id].project_blocked)
+            projects[_project_id].project_blocked = false;
+        // add to customers
+        projects[_project_id].customers[msg.sender].rating = _rating;
+        projects[_project_id].customers[msg.sender].review = _review;
+        if (_rating == 7) {
+            // warning issued to a private entity
+            emit LowRating(projects[_project_id].project_owner);
+        } else if (_rating == 6) {
+            // 3 per cent deduction from the wallet
+            // TODO:
+        } else if (_rating >= 5) {
+            // wallet blocked
+            projects[_project_id].project_blocked = true;
+        }
+    }
+
+    function completedProject(uint256 _project_id) public {
+        require(
+            projects[_project_id].project_owner == msg.sender,
+            "Only owner is allowed to complete the project"
+        );
+        require(
+            projects[_project_id].project_blocked == false,
+            "Project blocked cannot complete."
+        );
+        // if project finished on time
+        if (projects[_project_id].project_end_timestamp < block.timestamp) {
+            projects[_project_id].project_owner.transfer(
+                onePercent(address(this).balance) * 70
+            );
+        }
+    }
+
+    function getRating(uint256 _project_id, address customer)
+        public
+        view
+        returns (string memory, uint256)
+    {
+        return (
+            projects[_project_id].customers[customer].review,
+            projects[_project_id].customers[customer].rating
+        );
+    }
 }
