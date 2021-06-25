@@ -1,70 +1,85 @@
-# Getting Started with Create React App
+# Escrow Dapp
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+### Compile and deploy
+```
+truffle compile
+truffle migrate
+```
 
-## Available Scripts
+### Deploying to networks
+```sh
+# Add mnemonic words on .secret file
+export INFURA_KEY=<your-key>
+truffle migrate --network ropsten
+```
 
-In the project directory, you can run:
+## History
+### Ropsten
+```sh
+Starting migrations...
+======================
+> Network name:    'ropsten'
+> Network id:      3
+> Block gas limit: 10075070 (0x99bbbe)
 
-### `yarn start`
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+1_initial_migration.js
+======================
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+   Deploying 'Migrations'
+   ----------------------
+   > transaction hash:    0x81af85f095325d0faf3316250fa426d161fc9b3bb6e171b7fbf2a72e34637ee8
+   > Blocks: 13           Seconds: 170
+   > contract address:    0xA79D1AFa74756AD9b6455156A3e82Dd5A66c2284
+   > block number:        10508540
+   > block timestamp:     1624615589
+   > account:             0x1bdE485751FC4552e9d727f22038945D3D2ddaD9
+   > balance:             4.547990524140354297
+   > gas used:            188239 (0x2df4f)
+   > gas price:           99.348056777 gwei
+   > value sent:          0 ETH
+   > total cost:          0.018701178859645703 ETH
 
-### `yarn test`
+   Pausing for 2 confirmations...
+   ------------------------------
+   > confirmation number: 2 (block: 10508544)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+   > Saving migration to chain.
+   > Saving artifacts
+   -------------------------------------
+   > Total cost:     0.018701178859645703 ETH
 
-### `yarn build`
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+2-deploy-contract.js
+====================
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+   Deploying 'EscrowDapp'
+   ----------------------
+   > transaction hash:    0xa32e6a28ff5c911ea4e86d0231a0c0bfd63bb4d0665e1028b197a92142f6f9a6
+   > Blocks: 3            Seconds: 45
+   > contract address:    0xB4a08Df657Be5DCeCd3b483710a007EeAa8f4473
+   > block number:        10508554
+   > block timestamp:     1624615704
+   > account:             0x1bdE485751FC4552e9d727f22038945D3D2ddaD9
+   > balance:             4.469809190785374156
+   > gas used:            1191048 (0x122c88)
+   > gas price:           62.763566932 gwei
+   > value sent:          0 ETH
+   > total cost:          0.074754420867224736 ETH
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+   Pausing for 2 confirmations...
+   ------------------------------
+   > confirmation number: 1 (block: 10508555)
+   > confirmation number: 2 (block: 10508556)
 
-### `yarn eject`
+   > Saving migration to chain.
+   > Saving artifacts
+   -------------------------------------
+   > Total cost:     0.074754420867224736 ETH
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `yarn build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Summary
+=======
+> Total deployments:   2
+> Final cost:          0.093455599726870439 ETH
+```
